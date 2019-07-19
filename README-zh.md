@@ -5,46 +5,46 @@
 [![Documentation Status](https://img.shields.io/badge/中文文档-最新-brightgreen.svg)](https://github.com/aaronshan/hive-third-functions/tree/master/README-zh.md)
 [![Release](https://img.shields.io/github/release/aaronshan/hive-third-functions.svg)](https://github.com/aaronshan/hive-third-functions/releases)
 
-## Introduction
+## 简介
 
-Some useful custom hive udf functions, especial array and json functions.
+hive-third-functions 包含了一些很有用的hive udf函数，特别是数组和json函数.
 
-> Note:
-> hive-third-functions support hive-0.11.0 or higher.
+> 注意:
+> hive-third-functions支持hive-0.11.0或更高版本.
 
-## Build
+## 编译
 
-### 1. install dependency
+### 1. 安装依赖
 
-Now, jdo2-api-2.3-ec.jar not available in the maven central repository, so we have to manually install it into our local maven repository.
+目前, jdo2-api-2.3-ec.jar 在maven中央仓库中已经不可用, 因此我们不得不自己下载并安装到本地的maven库中. 命令如下：
 
 ```
 wget http://www.datanucleus.org/downloads/maven2/javax/jdo/jdo2-api/2.3-ec/jdo2-api-2.3-ec.jar -O ~/jdo2-api-2.3-ec.jar
 mvn install:install-file -DgroupId=javax.jdo -DartifactId=jdo2-api -Dversion=2.3-ec -Dpackaging=jar -Dfile=~/jdo2-api-2.3-ec.jar
 ```
 
-### 2. mvn package 
+### 2. 用mvn打包 
 
 ```
 cd ${project_home}
 mvn clean package
 ```
 
-If you want to skip unit tests, please run:
+如果你想跳过单元测试，可以这样运行：
 ```
 cd ${project_home}
 mvn clean package -DskipTests
 ```
 
-It will generate hive-third-functions-${version}-shaded.jar in target directory.
+命令执行完成后, 将会在target目录下生成hive-third-functions-${version}-shaded.jar文件.
 
-You can also directly download file from [release page](https://github.com/aaronshan/hive-third-functions/releases).
+你也可以直接在发布页下载打包好了最新版本 [发布页](https://github.com/aaronshan/hive-third-functions/releases).
 
-> current latest version is `2.2.1`
+> 当前最新的版本是 `2.2.1`
 
 ## Maven
 
-Now, I had already release `hive-third-functions` to maven repositories. To add a dependency on `hive-third-functions` using Maven, use the following:
+现在，我已经把`hive-third-functions`发布到maven中央仓库了。你可以在pom文件中增加如下dependency来使用它：
 
 ```
 <dependency>
@@ -54,78 +54,61 @@ Now, I had already release `hive-third-functions` to maven repositories. To add 
 </dependency>
 ```
 
-## Functions
+## 函数
 
-### 1. string functions
+### 1. 字符函数
 
-| function| description |
+| 函数| 描述 |
 |:--|:--|
-|pinyin(string) -> string | convert chinese to pinyin|
-|md5(string) -> string | md5 hash|
-|sha256(string) -> string |sha256 hash|
-|codepoint(string) -> integer | Returns the Unicode code point of the only character of string.|
-|hamming_distance(string1, string2) -> bigint | Returns the Hamming distance of string1 and string2.|
-|levenshtein_distance(string1, string2) -> bigint | Returns the Levenshtein edit distance of string1 and string2.|
-|normalize(string, form) -> varchar | Transforms string with the specified normalization form. form must be be one of the following keywords: <span id="jump">Normalize Form Description</span> |
-|strpos(string, substring) -> bigint | Returns the starting position of the first instance of substring in string. Positions start with 1. If not found, 0 is returned.|
-|split_to_map(string, entryDelimiter, keyValueDelimiter) -> map&lt;varchar, varchar> | Splits string by entryDelimiter and keyValueDelimiter and returns a map. entryDelimiter splits string into key-value pairs. keyValueDelimiter splits each pair into key and value.|
-|split_to_multimap(string, entryDelimiter, keyValueDelimiter) -> map(varchar, array(varchar)) | Splits string by entryDelimiter and keyValueDelimiter and returns a map containing an array of values for each unique key. entryDelimiter splits string into key-value pairs. keyValueDelimiter splits each pair into key and value. The values for each key will be in the same order as they appeared in string.|
+|pinyin(string) -> string | 将汉字转换为拼音|
+|md5(string) -> string | md5 哈希|
+|sha256(string) -> string |sha256 哈希|
 
-[Normalize Form Description](#jump)
+### 2. 数组函数
 
-| Form	| Description |
+| 函数| 描述 |
 |:--|:--|
-| NFD	| Canonical Decomposition |
-| NFC	| Canonical Decomposition, followed by Canonical Composition |
-| NFKD	| Compatibility Decomposition |
-| NFKC	| Compatibility Decomposition, followed by Canonical Composition |
+|array_contains(array&lt;E&gt;, E) -> boolean | 判断数组是否包含某个值.|
+|array_equals(array&lt;E&gt;, array&lt;E&gt;) -> boolean | 判断两个数组是否相等.|
+|array_intersect(array, array) -> array | 返回两个数组的交集.|
+|array_max(array&lt;E&gt;) -> E | 返回数组中的最大值.|
+|array_min(array&lt;E&gt;) -> E | 返回数组中的最小值.|
+|array_join(array, delimiter, null_replacement) -> string | 使用给定的连接符来连接数组中的元素, `null_replacement`是一个可选项, 用来替代空值.|
+|array_distinct(array) -> array | 移除数组中的重复元素.|
+|array_position(array&lt;E&gt;, E) -> long | 返回给定元素在数组中第一次出现的位置 (如果没找到, 返回0).|
+|array_remove(array&lt;E&gt;, E) -> array | 删除数组中的给定元素.|
+|array_reverse(array) -> array | 反转一个数组.|
+|array_sort(array) -> array | 对数组排序, 数组中的元素必需是可排序的.|
+|array_concat(array, array) -> array | 连接两个数组.|
+|array_value_count(array&lt;E&gt;, E) -> long | 统计数组中包含给定元素的个数.|
+|array_slice(array, start, length) -> array | 对数组进行分片操作，start为正数从前开始分片, start为负数从后开始分片, 长度为指定的长度.|
+|array_element_at(array&lt;E&gt;, index) -> E | 返回指定位置的数组元素. 如果索引位置 < 0, 则从尾部开始计数并返回.|
+|array_shuffle(array) -> array | 对数组shuffle.|
+|sequence(start, end) -> array<Long> | 生成数组序列.|
+|sequence(start, end, step) -> array<Long> | 生成数组序列.|
+|sequence(start_date_string, end_data_string, step) -> array<String> | 生成日期数组序列.|
 
-### 2. array functions
-
-| function| description |
+### 3. map函数
+| 函数| 描述 |
 |:--|:--|
-|array_contains(array&lt;E&gt;, E) -> boolean | whether array contains value or not.|
-|array_equals(array&lt;E&gt;, array&lt;E&gt;) -> boolean | whether two array equals or not.|
-|array_intersect(array, array) -> array | returns the two array's intersection, without duplicates.|
-|array_max(array&lt;E&gt;) -> E | returns the maximum value of input array.|
-|array_min(array&lt;E&gt;) -> E | returns the minimum value of input array.|
-|array_join(array, delimiter, null_replacement) -> string | concatenates the elements of the given array using the delimiter and an optional `null_replacement` to replace nulls.|
-|array_distinct(array) -> array | remove duplicate values from the array.|
-|array_position(array&lt;E&gt;, E) -> long | returns the position of the first occurrence of the element in array (or 0 if not found).|
-|array_remove(array&lt;E&gt;, E) -> array | remove all elements that equal element from array.|
-|array_reverse(array) -> array | reverse the array element.|
-|array_sort(array) -> array | sorts and returns the array. The elements of array must be orderable.|
-|array_concat(array, array) -> array | concatenates two arrays.|
-|array_value_count(array&lt;E&gt;, E) -> long | count array's element number that element value equals given value.|
-|array_slice(array, start, length) -> array | subsets array starting from index start (or starting from the end if start is negative) with a length of length.|
-|array_element_at(array&lt;E&gt;, index) -> E | returns element of array at given index. If index < 0, element_at accesses elements from the last to the first.|
-|array_shuffle(array) -> array | Generate a random permutation of the given array x.|
-|sequence(start, end) -> array<Long> | Generate a sequence of integers from start to stop.|
-|sequence(start, end, step) -> array<Long> | Generate a sequence of integers from start to stop, incrementing by step.|
-|sequence(start_date_string, end_data_string, step) -> array<String> | Generate a sequence of date string from start to stop, incrementing by step.|
-|array_value_count(array&lt;E&gt;, E) -> long | count array's element number that element value equals given value..|
+|map_build(x&lt;K&gt;, y&lt;V&gt;) -> map&lt;K, V&gt;| 根据指定的键/值对数组创建map.|
+|map_concat(x&lt;K, V&gt;, y&lt;K, V&gt;) -> map&lt;K,V&gt; | 返回两个map的并集. 如果一个键在 `x` 和 `y`中同时出现, 那对应值来自`y`.| 
+|map_element_at(map&lt;K, V&gt;, key) -> V | 如果指定的`key`存在，返回对应的值, 否则返回 `NULL` .|
+|map_equals(x&lt;K, V&gt;, y&lt;K, V&gt;) -> boolean |  判断map x 和 map y是否相等.|
 
-### 3. map functions
-| function| description |
+### 4. 日期函数
+
+| 函数| 描述 |
 |:--|:--|
-|map_build(x&lt;K&gt;, y&lt;V&gt;) -> map&lt;K, V&gt;| returns a map created using the given key/value arrays.|
-|map_concat(x&lt;K, V&gt;, y&lt;K, V&gt;) -> map&lt;K,V&gt; | returns the union of two maps. If a key is found in both `x` and `y`, that key’s value in the resulting map comes from `y`.|
-|map_element_at(map&lt;K, V&gt;, key) -> V | returns value for given `key`, or `NULL` if the key is not contained in the map.|
-|map_equals(x&lt;K, V&gt;, y&lt;K, V&gt;) -> boolean |  whether map x equals with map y or not.|
+|day_of_week(date_string \| date) -> int | 一周的第几天,周一返回 1, 周日返回 7, 出错返回null.|
+|day_of_year(date_string \| date) -> int | 一年的第几天. 值的范围从 1 到 366.|
+|zodiac_en(date_string \| date) -> string | 将日期转换为星座英文|
+|zodiac_cn(date_string \| date) -> string | 将日期转换为星座中文 | 
+|type_of_day(date_string \| date) -> string | 获取日期的类型(1: 法定节假日, 2: 正常周末, 3: 正常工作日 4:攒假的工作日),错误返回-1. |
 
-### 4. date functions
+### 5. json函数
 
-| function| description |
-|:--|:--|
-|day_of_week(date_string \| date) -> int | day of week,if monday,return 1, sunday return 7, error return null.|
-|day_of_year(date_string \| date) -> int | day of year. The value ranges from 1 to 366.|
-|zodiac_en(date_string \| date) -> string | convert date to zodiac|
-|zodiac_cn(date_string \| date) -> string | convert date to zodiac chinese |
-|type_of_day(date_string \| date) -> string | for chinese. 获取日期的类型(1: 法定节假日, 2: 正常周末, 3: 正常工作日 4:攒假的工作日),错误返回-1. |
-
-### 5. json functions
-
-| function| description |
+| 函数| 描述 |
 |:--|:--|
 |json_array_get(json, jsonPath) -> array(varchar) |returns the element at the specified index into the `json_array`. The index is zero-based.|
 |json_array_length(json, jsonPath) -> array(varchar) |returns the array length of `json` (a string containing a JSON array).|
@@ -135,76 +118,66 @@ Now, I had already release `hive-third-functions` to maven repositories. To add 
 |json_extract_scalar(json, jsonPath) -> array(varchar) |like `json_extract`, but returns the result value as a string (as opposed to being encoded as JSON).|
 |json_size(json, jsonPath) -> array(varchar) |like `json_extract`, but returns the size of the value. For objects or arrays, the size is the number of members, and the size of a scalar value is zero.|
 
-### 6. bitwise functions
+### 6. 位函数
 
-| function| description |
+| 函数| 描述 |
 |:--|:--|
 |bit_count(x, bits) -> bigint | count the number of bits set in `x` (treated as bits-bit signed integer) in 2’s complement representation |
 |bitwise_and(x, y) -> bigint | returns the bitwise AND of `x` and `y` in 2’s complement arithmetic.|
-|bitwise_not(x) -> bigint | returns the bitwise NOT of `x` in 2’s complement arithmetic. |
+|bitwise_not(x) -> bigint | returns the bitwise NOT of `x` in 2’s complement arithmetic. | 
 |bitwise_or(x, y) -> bigint | returns the bitwise OR of `x` and `y` in 2’s complement arithmetic.|
-|bitwise_xor(x, y) -> bigint | returns the bitwise XOR of `x` and `y` in 2’s complement arithmetic. |
+|bitwise_xor(x, y) -> bigint | returns the bitwise XOR of `x` and `y` in 2’s complement arithmetic. | 
 
-### 7. china id card functions
+### 7. 中国身份证函数
 
-| function| description |
+| 函数| 描述 |
 |:--|:--|
-|id_card_province(string) -> string |get user's province|
-|id_card_city(string) -> string |get user's city|
-|id_card_area(string) -> string |get user's area|
-|id_card_birthday(string) -> string |get user's birthday|
-|id_card_gender(string) -> string |get user's gender|
-|is_valid_id_card(string) -> boolean |determine is valid china id card No.|
-|id_card_info(string) -> json |get china id card info. include province, city, area etc.|
+|id_card_province(string) -> string |从身份证号获取省份|
+|id_card_city(string) -> string |从身份证号获取城市|
+|id_card_area(string) -> string |从身份证号获取区/县|
+|id_card_birthday(string) -> string |从身份证号获取生日|
+|id_card_gender(string) -> string |从身份证号获取性别|
+|is_valid_id_card(string) -> boolean |鉴定身份证号是否有效.|
+|id_card_info(string) -> json |获取身份证号信息. 包活省份、城市、区县等.|
 
-### 8. geographic functions 
+### 8. 坐标系函数 
 
-| function| description |
+| 函数| 描述 |
 |:--|:--|
-|wgs_distance(double lat1, double lng1, double lat2, double lng2) -> double | calculate WGS84 coordinate distance, in meters. |
-|gcj_to_bd(double,double) -> json | GCJ-02(火星坐标系) convert to BD-09(百度坐标系), 谷歌、高德——>百度|
-|bd_to_gcj(double,double) -> json | BD-09(百度坐标系) convert to GCJ-02(火星坐标系), 百度——>谷歌、高德|
-|wgs_to_gcj(double,double) -> json | WGS84(地球坐标系) convert to GCJ02(火星坐标系)|
-|gcj_to_wgs(double,double) -> json | GCJ02(火星坐标系) convert to GPS84(地球坐标系), output coordinate WGS-84 accuracy within 1 to 2 meters.|
-|gcj_extract_wgs(double,double) -> json | GCJ02(火星坐标系) convert to GPS84, output coordinate WGS-84 accuracy within 0.5 meters. but compute cost more time than `gcj_to_wgs`. |
+|wgs_distance(double lat1, double lng1, double lat2, double lng2) -> double | 计算 WGS84坐标距离, 单位米. |
+|gcj_to_bd(double,double) -> json | GCJ-02(火星坐标系) 转为 BD-09(百度坐标系), 谷歌、高德——>百度|
+|bd_to_gcj(double,double) -> json | BD-09(百度坐标系) 转为 GCJ-02(火星坐标系), 百度——>谷歌、高德|
+|wgs_to_gcj(double,double) -> json | WGS84(地球坐标系) 转为 GCJ02(火星坐标系)|
+|gcj_to_wgs(double,double) -> json | GCJ02(火星坐标系) 转为 GPS84(地球坐标系), 输出的坐标精度在1到2米.|
+|gcj_extract_wgs(double,double) -> json | GCJ02(火星坐标系) 转为 GPS84, 输出的坐标精度在0.5米. 但是计算比`gcj_to_wgs`耗时长. |
 
 > 关于互联网地图坐标系的说明见: [当前互联网地图的坐标系现状](https://github.com/aaronshan/hive-third-functions/tree/master/README-geo.md)
 
 
-### 9. url functions
+### 9. url函数
 
-| function| description |
+| 函数| 描述 |
 |:--|:--|
 |url_encode(value) -> string | escapes value by encoding it so that it can be safely included in URL query parameter names and values|
-|url_decode(value) -> string | unescape the URL encoded value. This function is the inverse of `url_encode`. |
+|url_decode(value) -> string | unescape the URL encoded value. This function is the inverse of `url_encode`. | 
 
-### 10. math functions
+### 10. 数学函数
 
 | function| description |
 |:--|:--|
-|infinity() -> double | Returns the constant representing positive infinity.|
-|is_finite(x) -> boolean | Determine if x is finite.|
-|is_infinite(x) -> boolean |Determine if x is infinite.|
-|is_nan(x) -> boolean | Determine if x is not-a-number.|
-|nan() -> double | Returns the constant representing not-a-number. |
-|from_base(string, radix) -> bigint | Returns the value of string interpreted as a base-radix number.|
-|to_base(x, radix) -> varchar | Returns the base-radix representation of x.|
-|cosine_similarity(x, y) -> double | Returns the cosine similarity between the sparse vectors x and y|
-|inverse_normal_cdf(mean, sd, p) -> double | Compute the inverse of the Normal cdf with given mean and standard deviation (sd) for the cumulative probability (p): P(N &lt; n). The mean must be a real value and the standard deviation must be a real and positive value. The probability p must lie on the interval (0, 1). |
-|normal_cdf(mean, sd, v) -> double | Compute the Normal cdf with given mean and standard deviation (sd): P(N < v; mean, sd). The mean and value v must be real values and the standard deviation must be a real and positive value.|
+|infinity() -> double | 获取正无穷常数|
+|is_finite(x) -> boolean | 判断x是否为有限数值|
+|is_infinite(x) -> boolean |判断x是否为无穷数值|
+|is_nan(x) -> boolean | 判断x是否不是一个数值类型的变量|
+|nan() -> double | 获取一个表示NAN（not-a-number）的常数 |
+|from_base(string, radix) -> bigint | 获取字面量的值，该值的基数为radix|
+|to_base(x, radix) -> varchar | 返回x以radix为基数的字面量|
+|cosine_similarity(x, y) -> double | 返回两个稀疏向量的余弦相似度|
 
-### 11. regexp functions
-| function| description |
-|:--|:--|
-|regexp_like(string, pattern) -> boolean | Evaluates the regular expression pattern and determines if it is contained within string.|
-|regexp_extract_all(string, pattern) -> array(varchar) | Returns the substring(s) matched by the regular expression pattern in string. |
-|regexp_extract(string, pattern) -> varchar | Returns the first substring matched by the regular expression pattern in string.|
-|regexp_replace(string, pattern) -> varchar | Removes every instance of the substring matched by the regular expression pattern from string.|
-|regexp_replace(string, pattern, replacement) -> varchar | Replaces every instance of the substring matched by the regular expression pattern in string with replacement. |
 
-## Use
+## 用法
 
-Put these statements into `${HOME}/.hiverc` or exec its on hive cli env.
+将下面这些内容写入 `${HOME}/.hiverc` 文件, 或者也可以按需在hive命令行环境中执行.
 
 ```
 add jar ${jar_location_dir}/hive-third-functions-${version}-shaded.jar
@@ -289,13 +262,13 @@ create temporary function regexp_replace as 'com.github.aaronshan.functions.rege
 create temporary function regexp_split as 'com.github.aaronshan.functions.regexp.UDFRe2JRegexpSplit';
 ```
 
-You can use these statements on hive cli env get detail of function.
+你可以在hive的命令杭中使用下面的语句来查看函数的细节.
 ```
 hive> describe function zodiac_cn;
 zodiac_cn(date) - from the input date string or separate month and day arguments, returns the sing of the Zodiac.
 ```
 
-or
+或者
 
 ```
 hive> describe function extended zodiac_cn;
@@ -305,7 +278,7 @@ Example:
  > select zodiac_cn(month, day) from src;
 ```
 
-### example
+### 示例
 ```
  select pinyin('中国') => zhongguo
  select md5('aaronshan') => 95686bc0483262afe170b550dd4544d1
